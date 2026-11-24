@@ -161,8 +161,22 @@
     /* ── Add tip ── */
     .tip-input-wrap {
       display: flex;
+      flex-direction: column;
       gap: 10px;
-      align-items: stretch;
+    }
+    .tip-input-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      background: var(--gray-50);
+      transition: border-color .15s;
+      overflow: hidden;
+    }
+    .tip-input-row:focus-within {
+      border-color: var(--orange);
+      background: #fff;
     }
     .tip-input-wrap .prefix {
       display: flex;
@@ -170,35 +184,35 @@
       font-size: 1.3rem;
       font-weight: 700;
       color: var(--gray-400);
-      padding-left: 2px;
+      padding: 0 4px 0 14px;
+      flex-shrink: 0;
     }
     .tip-input {
       flex: 1;
-      border: 2px solid var(--gray-200);
-      border-radius: var(--radius-sm);
-      padding: 14px 12px;
-      font-size: 1.5rem;
+      border: none;
+      background: transparent;
+      padding: 16px 10px;
+      font-size: 1.6rem;
       font-weight: 700;
       color: var(--gray-800);
-      background: var(--gray-50);
       outline: none;
-      transition: border-color .15s;
+      min-width: 0;
       -webkit-appearance: none;
     }
-    .tip-input:focus { border-color: var(--orange); background: #fff; }
     .btn-add {
       background: var(--orange);
       color: #fff;
       border: none;
       border-radius: var(--radius-sm);
-      padding: 14px 20px;
-      font-size: 1.1rem;
+      padding: 16px;
+      font-size: 1.05rem;
       font-weight: 700;
       cursor: pointer;
       transition: background .15s, transform .1s;
-      white-space: nowrap;
+      width: 100%;
+      letter-spacing: .3px;
     }
-    .btn-add:active { background: var(--orange-dk); transform: scale(.97); }
+    .btn-add:active { background: var(--orange-dk); transform: scale(.98); }
 
     /* ── Quick amounts ── */
     .quick-amounts {
@@ -516,17 +530,19 @@
     <div class="card" id="addTipCard">
       <div class="card-title">Agregar propina</div>
       <div class="tip-input-wrap">
-        <div class="prefix">$</div>
-        <input
-          class="tip-input"
-          id="tipInput"
-          type="number"
-          inputmode="decimal"
-          placeholder="0.00"
-          min="0"
-          step="0.50"
-        />
-        <button class="btn-add" onclick="addTip()">+ Agregar</button>
+        <div class="tip-input-row">
+          <div class="prefix">$</div>
+          <input
+            class="tip-input"
+            id="tipInput"
+            type="number"
+            inputmode="decimal"
+            placeholder="0.00"
+            min="0"
+            step="0.50"
+          />
+        </div>
+        <button class="btn-add" onclick="addTip()">+ Agregar propina</button>
       </div>
       <div style="margin-top:12px;">
         <div class="card-title" style="margin-bottom:8px;">Rápido</div>
