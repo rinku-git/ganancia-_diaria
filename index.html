@@ -487,6 +487,65 @@
 
     /* ── No data state ── */
     .no-week-data { text-align:center; color:var(--gray-400); font-size:.88rem; padding:32px 0; }
+
+    /* ── Dark mode variables ── */
+    html.dark {
+      --orange-lt:  #3a1a00;
+      --green-lt:   #052e16;
+      --red-lt:     #2d0a0a;
+      --gray-50:    #1a1a1a;
+      --gray-100:   #111111;
+      --gray-200:   #2e2e2e;
+      --gray-400:   #6b7280;
+      --gray-600:   #9ca3af;
+      --gray-800:   #f3f4f6;
+      --shadow:     0 2px 12px rgba(0,0,0,.40);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,.55);
+    }
+
+    html.dark body                        { background: #111; color: var(--gray-800); }
+    html.dark #app                        { background: #1a1a1a; }
+    html.dark .tabs                       { background: #1f1f1f; border-color: #2e2e2e; }
+    html.dark .tab                        { color: #555; }
+    html.dark .card                       { background: #1f1f1f; }
+    html.dark .total-box                  { background: #2a2a2a; }
+    html.dark .total-box.highlight        { background: var(--orange-lt); }
+    html.dark .tip-input-row              { background: #2a2a2a; border-color: #3a3a3a; }
+    html.dark .tip-input-row:focus-within { background: #222; border-color: var(--orange); }
+    html.dark .tip-input                  { color: var(--gray-800); }
+    html.dark .didi-input                 { background: #2a2a2a; border-color: #3a3a3a; color: var(--gray-800); }
+    html.dark .didi-input:focus           { background: #222; border-color: var(--green); }
+    html.dark .summary-box                { background: #052e16; border-color: #14532d; }
+    html.dark .summary-line               { color: #86efac; }
+    html.dark .summary-line.total         { color: #4ade80; border-color: #14532d; }
+    html.dark .tip-item                   { background: #2a2a2a; }
+    html.dark .week-day-item              { background: #1f1f1f; }
+    html.dark .btn-nav                    { background: #2a2a2a; color: var(--gray-800); }
+    html.dark .btn-nav:active             { background: #333; }
+    html.dark .modal                      { background: #1f1f1f; }
+    html.dark .modal p                    { color: var(--gray-600); }
+    html.dark .btn-cancel                 { background: #2a2a2a; color: var(--gray-800); }
+    html.dark .day-closed-banner          { background: #052e16; border-color: #14532d; }
+    html.dark .day-closed-banner p        { color: #86efac; }
+    html.dark .btn-close-day:disabled     { background: #2a2a2a; color: #555; }
+
+    /* ── Dark mode toggle button ── */
+    .btn-dark-toggle {
+      background: rgba(255,255,255,.18);
+      border: none;
+      color: #fff;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, transform .2s;
+      flex-shrink: 0;
+    }
+    .btn-dark-toggle:active { background: rgba(255,255,255,.35); transform: scale(.9) rotate(20deg); }
   </style>
 </head>
 <body>
@@ -496,7 +555,10 @@
   <div class="header">
     <div class="header-top">
       <h1>🛵 DiDi Propinas</h1>
-      <button class="btn-week-toggle" onclick="switchTab('semana')">📅 Semana</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-dark-toggle" id="btnDark" onclick="toggleDark()" title="Modo oscuro">🌙</button>
+        <button class="btn-week-toggle" onclick="switchTab('semana')">📅 Semana</button>
+      </div>
     </div>
     <div class="header-date" id="headerDate"></div>
   </div>
@@ -756,9 +818,31 @@ let weekOffset = 0; // 0 = current week, -1 = last week, etc.
 let pendingDeleteId = null;
 
 // ──────────────────────────────────────────────
+//  DARK MODE
+// ──────────────────────────────────────────────
+function toggleDark() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('didi_dark', isDark ? '1' : '0');
+  document.getElementById('btnDark').textContent = isDark ? '☀️' : '🌙';
+}
+
+function initDark() {
+  const saved = localStorage.getItem('didi_dark');
+  // Si guardó preferencia, úsala; si no, respeta el sistema operativo
+  const prefersDark = saved !== null
+    ? saved === '1'
+    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (prefersDark) {
+    document.documentElement.classList.add('dark');
+    document.getElementById('btnDark').textContent = '☀️';
+  }
+}
+
+// ──────────────────────────────────────────────
 //  INIT
 // ──────────────────────────────────────────────
 function init() {
+  initDark();
   updateHeaderDate();
   renderToday();
   renderWeek();
