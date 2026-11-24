@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#FF6B00" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>DiDi Propinas</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange:     #FF6B00;
+      --orange-dk:  #E05A00;
+      --orange-lt:  #FFF0E6;
+      --green:      #22C55E;
+      --green-dk:   #16A34A;
+      --green-lt:   #F0FDF4;
+      --red:        #EF4444;
+      --red-lt:     #FEF2F2;
+      --gray-50:    #F9FAFB;
+      --gray-100:   #F3F4F6;
+      --gray-200:   #E5E7EB;
+      --gray-400:   #9CA3AF;
+      --gray-600:   #4B5563;
+      --gray-800:   #1F2937;
+      --radius:     16px;
+      --radius-sm:  10px;
+      --shadow:     0 2px 12px rgba(0,0,0,.10);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,.14);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ── */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--gray-50);
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--orange);
+      color: #fff;
+      padding: 20px 20px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -.3px;
+    }
+    .header-date {
+      font-size: .78rem;
+      opacity: .88;
+      margin-top: 2px;
+    }
+    .btn-week-toggle {
+      background: rgba(255,255,255,.22);
+      border: none;
+      color: #fff;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-week-toggle:active { background: rgba(255,255,255,.35); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .tab {
+      flex: 1;
+      padding: 13px 0;
+      border: none;
+      background: none;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--gray-400);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .tab.active {
+      color: var(--orange);
+      border-bottom-color: var(--orange);
+    }
+
+    /* ── Main content ── */
+    .view { display: none; flex: 1; padding: 16px; flex-direction: column; gap: 14px; }
+    .view.active { display: flex; }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--gray-400);
+      margin-bottom: 8px;
+    }
+
+    /* ── Today totals ── */
+    .totals-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .total-box {
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .total-box.highlight { background: var(--orange-lt); }
+    .total-box .amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      line-height: 1.1;
+    }
+    .total-box.highlight .amount { color: var(--orange); }
+    .total-box .label {
+      font-size: .72rem;
+      color: var(--gray-400);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ── Add tip ── */
+    .tip-input-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .tip-input-wrap .prefix {
+      display: flex;
+      align-items: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gray-400);
+      padding-left: 2px;
+    }
+    .tip-input {
+      flex: 1;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      background: var(--gray-50);
+      outline: none;
+      transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    .tip-input:focus { border-color: var(--orange); background: #fff; }
+    .btn-add {
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      white-space: nowrap;
+    }
+    .btn-add:active { background: var(--orange-dk); transform: scale(.97); }
+
+    /* ── Quick amounts ── */
+    .quick-amounts {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-quick {
+      background: var(--orange-lt);
+      color: var(--orange-dk);
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-quick:active { background: #ffd9bb; }
+
+    /* ── Tip list ── */
+    .tip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .tip-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      animation: fadeIn .2s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .tip-item .tip-time { font-size: .75rem; color: var(--gray-400); }
+    .tip-item .tip-amount { font-size: 1.05rem; font-weight: 700; color: var(--green); }
+    .btn-del {
+      background: none;
+      border: none;
+      color: var(--gray-400);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color .15s, background .15s;
+      line-height: 1;
+    }
+    .btn-del:active { color: var(--red); background: var(--red-lt); }
+    .empty-tips {
+      text-align: center;
+      color: var(--gray-400);
+      font-size: .88rem;
+      padding: 24px 0;
+    }
+
+    /* ── Close day ── */
+    .close-day-section { display: flex; flex-direction: column; gap: 12px; }
+    .didi-input-wrap { position: relative; }
+    .didi-input-wrap .currency-sign {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gray-400);
+      pointer-events: none;
+    }
+    .didi-input {
+      width: 100%;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      padding: 14px 14px 14px 32px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      background: var(--gray-50);
+      outline: none;
+      transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    .didi-input:focus { border-color: var(--green); background: #fff; }
+
+    .summary-box {
+      background: var(--green-lt);
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #bbf7d0;
+      padding: 16px;
+      display: none;
+    }
+    .summary-box.visible { display: block; }
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: .9rem;
+      color: var(--gray-600);
+      padding: 3px 0;
+    }
+    .summary-line.total {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green-dk);
+      border-top: 1.5px solid #bbf7d0;
+      margin-top: 8px;
+      padding-top: 10px;
+    }
+
+    .btn-close-day {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: background .15s, transform .1s;
+      width: 100%;
+    }
+    .btn-close-day:active { background: var(--green-dk); transform: scale(.98); }
+    .btn-close-day:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; transform: none; }
+
+    /* ── Day closed banner ── */
+    .day-closed-banner {
+      background: var(--green-lt);
+      border: 1.5px solid #bbf7d0;
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: center;
+      display: none;
+    }
+    .day-closed-banner.visible { display: block; }
+    .day-closed-banner h3 { color: var(--green-dk); font-size: 1rem; margin-bottom: 4px; }
+    .day-closed-banner p { color: var(--gray-600); font-size: .85rem; }
+    .btn-reopen {
+      margin-top: 12px;
+      background: none;
+      border: 1.5px solid var(--green);
+      color: var(--green-dk);
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ── Week view ── */
+    .week-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .week-nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn-nav {
+      background: var(--gray-100);
+      border: none;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+    .btn-nav:active { background: var(--gray-200); }
+    .week-label { font-size: .85rem; font-weight: 600; color: var(--gray-600); }
+
+    .week-day-list { display: flex; flex-direction: column; gap: 8px; }
+    .week-day-item {
+      background: #fff;
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .week-day-item.today { border-left: 4px solid var(--orange); }
+    .week-day-item.has-data { }
+    .week-day-item.empty-day { opacity: .5; }
+    .day-name-col { width: 70px; }
+    .day-name { font-size: .88rem; font-weight: 700; color: var(--gray-800); }
+    .day-date { font-size: .72rem; color: var(--gray-400); }
+    .day-amounts { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .day-tip-line { font-size: .78rem; color: var(--gray-500); }
+    .day-tip-line span { font-weight: 600; color: var(--orange); }
+    .day-didi-line { font-size: .78rem; color: var(--gray-500); }
+    .day-didi-line span { font-weight: 600; color: var(--green); }
+    .day-total-col { text-align: right; }
+    .day-total-amount { font-size: 1rem; font-weight: 700; color: var(--gray-800); }
+    .day-total-label { font-size: .7rem; color: var(--gray-400); }
+    .day-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      flex-shrink: 0;
+    }
+    .week-day-item.closed .day-status-dot { background: var(--green); }
+    .week-day-item.open .day-status-dot { background: var(--orange); }
+
+    .week-total-card {
+      background: var(--orange);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .week-total-card .wt-label { font-size: .85rem; opacity: .88; margin-bottom: 2px; }
+    .week-total-card .wt-amount { font-size: 1.6rem; font-weight: 700; }
+    .week-total-breakdown { font-size: .78rem; opacity: .8; margin-top: 4px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--gray-800);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 24px;
+      font-size: .9rem;
+      font-weight: 600;
+      z-index: 999;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      white-space: nowrap;
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 24px 20px 36px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(60px); opacity:0; } to { transform: none; opacity:1; } }
+    .modal h3 { font-size: 1rem; margin-bottom: 6px; }
+    .modal p { font-size: .88rem; color: var(--gray-600); margin-bottom: 18px; }
+    .modal-actions { display: flex; gap: 10px; }
+    .btn-confirm { flex:1; background: var(--red); color:#fff; border:none; border-radius:var(--radius-sm); padding:14px; font-size:.95rem; font-weight:700; cursor:pointer; }
+    .btn-cancel  { flex:1; background: var(--gray-100); color:var(--gray-800); border:none; border-radius:var(--radius-sm); padding:14px; font-size:.95rem; font-weight:700; cursor:pointer; }
+
+    /* ── No data state ── */
+    .no-week-data { text-align:center; color:var(--gray-400); font-size:.88rem; padding:32px 0; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <h1>🛵 DiDi Propinas</h1>
+      <button class="btn-week-toggle" onclick="switchTab('semana')">📅 Semana</button>
+    </div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-hoy" onclick="switchTab('hoy')">Hoy</button>
+    <button class="tab" id="tab-cerrar" onclick="switchTab('cerrar')">Cerrar día</button>
+    <button class="tab" id="tab-semana" onclick="switchTab('semana')">Semana</button>
+  </div>
+
+  <!-- ── VIEW: HOY ── -->
+  <div class="view active" id="view-hoy">
+
+    <!-- Totals -->
+    <div class="card">
+      <div class="card-title">Resumen del día</div>
+      <div class="totals-row">
+        <div class="total-box highlight">
+          <div class="amount" id="todayTips">$0</div>
+          <div class="label">Propinas</div>
+        </div>
+        <div class="total-box">
+          <div class="amount" id="todayCount">0</div>
+          <div class="label">Propinas recibidas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add tip -->
+    <div class="card" id="addTipCard">
+      <div class="card-title">Agregar propina</div>
+      <div class="tip-input-wrap">
+        <div class="prefix">$</div>
+        <input
+          class="tip-input"
+          id="tipInput"
+          type="number"
+          inputmode="decimal"
+          placeholder="0.00"
+          min="0"
+          step="0.50"
+        />
+        <button class="btn-add" onclick="addTip()">+ Agregar</button>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="card-title" style="margin-bottom:8px;">Rápido</div>
+        <div class="quick-amounts">
+          <button class="btn-quick" onclick="setQuick(5)">$5</button>
+          <button class="btn-quick" onclick="setQuick(10)">$10</button>
+          <button class="btn-quick" onclick="setQuick(15)">$15</button>
+          <button class="btn-quick" onclick="setQuick(20)">$20</button>
+          <button class="btn-quick" onclick="setQuick(25)">$25</button>
+          <button class="btn-quick" onclick="setQuick(50)">$50</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tip list -->
+    <div class="card">
+      <div class="card-title">Propinas de hoy</div>
+      <div class="tip-list" id="tipList">
+        <div class="empty-tips">Aún no hay propinas registradas</div>
+      </div>
+    </div>
+
+    <!-- Day closed banner (shown when day is closed) -->
+    <div class="day-closed-banner" id="dayClosedBanner">
+      <h3>✅ Día cerrado</h3>
+      <p>Ya registraste el cierre de hoy. Puedes ver el resumen en la pestaña <strong>Semana</strong>.</p>
+      <button class="btn-reopen" onclick="reopenDay()">Reabrir día</button>
+    </div>
+
+  </div>
+
+  <!-- ── VIEW: CERRAR DÍA ── -->
+  <div class="view" id="view-cerrar">
+
+    <div class="card close-day-section">
+      <div class="card-title">Ganancias app DiDi Food</div>
+      <p style="font-size:.85rem;color:var(--gray-600);margin-bottom:12px;">
+        Ingresa el total que muestra la app de DiDi Food por entregas del día.
+      </p>
+      <div class="didi-input-wrap">
+        <span class="currency-sign">$</span>
+        <input
+          class="didi-input"
+          id="didiInput"
+          type="number"
+          inputmode="decimal"
+          placeholder="0.00"
+          min="0"
+          step="0.50"
+          oninput="updateSummary()"
+        />
+      </div>
+
+      <!-- Summary preview -->
+      <div class="summary-box" id="summaryBox">
+        <div class="summary-line">
+          <span>Propinas del día</span>
+          <span id="sumTips">$0.00</span>
+        </div>
+        <div class="summary-line">
+          <span>Ganancias DiDi</span>
+          <span id="sumDidi">$0.00</span>
+        </div>
+        <div class="summary-line total">
+          <span>Total del día</span>
+          <span id="sumTotal">$0.00</span>
+        </div>
+      </div>
+
+      <button class="btn-close-day" id="btnCloseDay" onclick="closeDay()" disabled>
+        Cerrar día y guardar
+      </button>
+    </div>
+
+    <div class="card" style="font-size:.82rem;color:var(--gray-500);line-height:1.6;">
+      💡 <strong>¿Dónde veo mis ganancias DiDi?</strong><br>
+      Abre la app de DiDi Food → Billetera → Historial de pagos → selecciona el día de hoy.
+    </div>
+
+  </div>
+
+  <!-- ── VIEW: SEMANA ── -->
+  <div class="view" id="view-semana">
+
+    <div class="card">
+      <div class="week-header">
+        <div class="card-title" style="margin:0;">Semana de trabajo</div>
+        <div class="week-nav">
+          <button class="btn-nav" onclick="changeWeek(-1)">‹</button>
+          <span class="week-label" id="weekLabel"></span>
+          <button class="btn-nav" id="btnNextWeek" onclick="changeWeek(1)">›</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-day-list" id="weekDayList"></div>
+
+    <div class="week-total-card" id="weekTotalCard">
+      <div>
+        <div class="wt-label">Total de la semana</div>
+        <div class="wt-amount" id="weekTotalAmount">$0.00</div>
+        <div class="week-total-breakdown" id="weekTotalBreakdown"></div>
+      </div>
+      <div style="font-size:2rem;">💰</div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Delete confirm modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>¿Eliminar propina?</h3>
+    <p>Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ──────────────────────────────────────────────
+//  STORAGE HELPERS
+// ──────────────────────────────────────────────
+const STORE_KEY = 'didi_propinas_v1';
+
+function loadData() {
+  try {
+    return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+  } catch { return {}; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(data));
+}
+
+// dateKey: "YYYY-MM-DD"
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getDay(key) {
+  const data = loadData();
+  if (!data[key]) {
+    data[key] = { tips: [], didi: null, closed: false };
+    saveData(data);
+  }
+  return data[key];
+}
+
+function setDay(key, dayObj) {
+  const data = loadData();
+  data[key] = dayObj;
+  saveData(data);
+}
+
+// ──────────────────────────────────────────────
+//  DATES & WEEKS
+// ──────────────────────────────────────────────
+function formatDateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function parseKey(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+// Get Monday of the week containing `date`
+function getWeekMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun
+  const diff = (day === 0) ? -6 : 1 - day; // adjust to Monday
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+
+function getWeekDays(monday) {
+  return Array.from({length: 7}, (_, i) => addDays(monday, i));
+}
+
+const DAY_NAMES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function fmtShortDate(date) {
+  return `${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`;
+}
+
+function formatMoney(n) {
+  return '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// ──────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────
+let currentTab = 'hoy';
+let weekOffset = 0; // 0 = current week, -1 = last week, etc.
+let pendingDeleteId = null;
+
+// ──────────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────────
+function init() {
+  updateHeaderDate();
+  renderToday();
+  renderWeek();
+}
+
+function updateHeaderDate() {
+  const d = new Date();
+  const el = document.getElementById('headerDate');
+  el.textContent = `${DAY_NAMES[d.getDay()]}, ${fmtShortDate(d)}`;
+}
+
+// ──────────────────────────────────────────────
+//  TABS
+// ──────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById(`view-${tab}`).classList.add('active');
+  if (tab === 'semana') renderWeek();
+  if (tab === 'cerrar') renderCloseDay();
+}
+
+// ──────────────────────────────────────────────
+//  TODAY VIEW
+// ──────────────────────────────────────────────
+function renderToday() {
+  const key = todayKey();
+  const day = getDay(key);
+
+  const totalTips = day.tips.reduce((s, t) => s + t.amount, 0);
+  document.getElementById('todayTips').textContent = formatMoney(totalTips);
+  document.getElementById('todayCount').textContent = day.tips.length;
+
+  // Tip list
+  const listEl = document.getElementById('tipList');
+  if (day.tips.length === 0) {
+    listEl.innerHTML = '<div class="empty-tips">Aún no hay propinas registradas</div>';
+  } else {
+    listEl.innerHTML = [...day.tips].reverse().map(t => `
+      <div class="tip-item" id="tip-${t.id}">
+        <span class="tip-time">${t.time}</span>
+        <span class="tip-amount">${formatMoney(t.amount)}</span>
+        <button class="btn-del" onclick="askDelete('${t.id}')">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // Show/hide closed banner & add form
+  const banner = document.getElementById('dayClosedBanner');
+  const addCard = document.getElementById('addTipCard');
+  if (day.closed) {
+    banner.classList.add('visible');
+    addCard.style.opacity = '0.45';
+    addCard.style.pointerEvents = 'none';
+  } else {
+    banner.classList.remove('visible');
+    addCard.style.opacity = '';
+    addCard.style.pointerEvents = '';
+  }
+}
+
+function addTip() {
+  const input = document.getElementById('tipInput');
+  const val = parseFloat(input.value);
+  if (!val || val <= 0) { showToast('Ingresa un monto válido'); return; }
+
+  const key = todayKey();
+  const day = getDay(key);
+  if (day.closed) { showToast('El día ya está cerrado'); return; }
+
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  day.tips.push({ id: `${Date.now()}`, amount: val, time });
+  setDay(key, day);
+
+  input.value = '';
+  input.focus();
+  renderToday();
+  showToast(`+${formatMoney(val)} agregado ✓`);
+}
+
+function setQuick(amount) {
+  const key = todayKey();
+  const day = getDay(key);
+  if (day.closed) { showToast('El día ya está cerrado'); return; }
+
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  day.tips.push({ id: `${Date.now()}`, amount, time });
+  setDay(key, day);
+  renderToday();
+  showToast(`+${formatMoney(amount)} agregado ✓`);
+}
+
+// ── Delete flow ──
+function askDelete(id) {
+  pendingDeleteId = id;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal() {
+  pendingDeleteId = null;
+  document.getElementById('deleteModal').classList.remove('open');
+}
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const key = todayKey();
+  const day = getDay(key);
+  day.tips = day.tips.filter(t => t.id !== pendingDeleteId);
+  setDay(key, day);
+  closeDeleteModal();
+  renderToday();
+  showToast('Propina eliminada');
+}
+
+function reopenDay() {
+  const key = todayKey();
+  const day = getDay(key);
+  day.closed = false;
+  day.didi = null;
+  setDay(key, day);
+  renderToday();
+  renderWeek();
+  showToast('Día reabierto');
+}
+
+// ──────────────────────────────────────────────
+//  CLOSE DAY VIEW
+// ──────────────────────────────────────────────
+function renderCloseDay() {
+  const key = todayKey();
+  const day = getDay(key);
+  const didiInput = document.getElementById('didiInput');
+  didiInput.value = day.didi !== null ? day.didi : '';
+  updateSummary();
+}
+
+function updateSummary() {
+  const key = todayKey();
+  const day = getDay(key);
+  const totalTips = day.tips.reduce((s, t) => s + t.amount, 0);
+
+  const didiVal = parseFloat(document.getElementById('didiInput').value) || 0;
+  const total = totalTips + didiVal;
+
+  const summaryBox = document.getElementById('summaryBox');
+  const btn = document.getElementById('btnCloseDay');
+
+  if (didiVal > 0 || totalTips > 0) {
+    summaryBox.classList.add('visible');
+    document.getElementById('sumTips').textContent = formatMoney(totalTips);
+    document.getElementById('sumDidi').textContent = formatMoney(didiVal);
+    document.getElementById('sumTotal').textContent = formatMoney(total);
+  } else {
+    summaryBox.classList.remove('visible');
+  }
+
+  btn.disabled = day.closed || (didiVal === 0 && totalTips === 0);
+
+  if (day.closed) {
+    btn.textContent = '✅ Día ya cerrado';
+  } else {
+    btn.textContent = 'Cerrar día y guardar';
+  }
+}
+
+function closeDay() {
+  const key = todayKey();
+  const day = getDay(key);
+  if (day.closed) return;
+
+  const didiVal = parseFloat(document.getElementById('didiInput').value) || 0;
+  day.didi = didiVal;
+  day.closed = true;
+  setDay(key, day);
+
+  renderToday();
+  renderCloseDay();
+  renderWeek();
+  showToast('¡Día cerrado! 🎉');
+  setTimeout(() => switchTab('semana'), 800);
+}
+
+// ──────────────────────────────────────────────
+//  WEEK VIEW
+// ──────────────────────────────────────────────
+function changeWeek(delta) {
+  weekOffset += delta;
+  if (weekOffset > 0) weekOffset = 0; // can't go to future weeks
+  renderWeek();
+}
+
+function renderWeek() {
+  const today = new Date();
+  const baseMonday = getWeekMonday(today);
+  const monday = addDays(baseMonday, weekOffset * 7);
+  const days = getWeekDays(monday);
+  const sunday = days[6];
+
+  // Week label
+  const sameMonth = monday.getMonth() === sunday.getMonth();
+  const weekLabel = sameMonth
+    ? `${monday.getDate()}–${sunday.getDate()} ${MONTH_NAMES[sunday.getMonth()]}`
+    : `${fmtShortDate(monday)}–${fmtShortDate(sunday)}`;
+  document.getElementById('weekLabel').textContent = weekLabel;
+
+  // Disable next button if current week
+  document.getElementById('btnNextWeek').disabled = weekOffset >= 0;
+  document.getElementById('btnNextWeek').style.opacity = weekOffset >= 0 ? '0.3' : '1';
+
+  const data = loadData();
+  let totalTips = 0, totalDidi = 0, hasAny = false;
+
+  const listEl = document.getElementById('weekDayList');
+  listEl.innerHTML = days.map(date => {
+    const key = formatDateKey(date);
+    const isToday = key === todayKey();
+    const dayData = data[key] || { tips: [], didi: null, closed: false };
+
+    const dayTips = dayData.tips ? dayData.tips.reduce((s, t) => s + t.amount, 0) : 0;
+    const dayDidi = dayData.didi || 0;
+    const dayTotal = dayTips + dayDidi;
+    const hasData = dayTips > 0 || dayDidi > 0;
+
+    if (hasData) hasAny = true;
+    totalTips += dayTips;
+    totalDidi += dayDidi;
+
+    const statusClass = dayData.closed ? 'closed' : (hasData ? 'open' : '');
+    const todayClass = isToday ? 'today' : '';
+    const emptyClass = !hasData ? 'empty-day' : '';
+
+    return `
+      <div class="week-day-item ${statusClass} ${todayClass} ${emptyClass}">
+        <div class="day-status-dot"></div>
+        <div class="day-name-col">
+          <div class="day-name">${DAY_NAMES[date.getDay()].substring(0,3)}</div>
+          <div class="day-date">${fmtShortDate(date)}${isToday ? ' ·hoy' : ''}</div>
+        </div>
+        <div class="day-amounts">
+          ${hasData ? `
+            <div class="day-tip-line">Propinas: <span>${formatMoney(dayTips)}</span></div>
+            <div class="day-didi-line">DiDi app: <span>${dayDidi > 0 ? formatMoney(dayDidi) : '—'}</span></div>
+          ` : '<div style="font-size:.8rem;color:var(--gray-400);">Sin registros</div>'}
+        </div>
+        <div class="day-total-col">
+          <div class="day-total-amount">${hasData ? formatMoney(dayTotal) : '—'}</div>
+          <div class="day-total-label">${dayData.closed ? 'cerrado' : (hasData ? 'abierto' : '')}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Week total
+  const weekTotal = totalTips + totalDidi;
+  document.getElementById('weekTotalAmount').textContent = formatMoney(weekTotal);
+  document.getElementById('weekTotalBreakdown').textContent =
+    `Propinas ${formatMoney(totalTips)} · DiDi ${formatMoney(totalDidi)}`;
+}
+
+// ──────────────────────────────────────────────
+//  TOAST
+// ──────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ──────────────────────────────────────────────
+//  KEYBOARD: Enter to add
+// ──────────────────────────────────────────────
+document.getElementById('tipInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTip();
+});
+
+// Close modal on overlay click
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+// ──────────────────────────────────────────────
+//  START
+// ──────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
